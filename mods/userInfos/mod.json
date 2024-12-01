@@ -1,0 +1,17 @@
+{
+  "name": "UserInfos",
+  "author": "F2Ville",
+  "description": "Get user infos on Steam profiles.",
+  "version": "1.0.0",
+  "config": {
+    "enableDevTools": true,
+    "init": "init.js",
+    "runtime": "runtime.js",
+    "stop": "stop.js"
+  },
+  "pages": [
+    {
+      "urlContains": "https://steamcommunity.com/id/"
+    }
+  ]
+}

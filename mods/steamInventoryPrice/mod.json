@@ -1,0 +1,18 @@
+{
+  "name": "Steam Inventory Price",
+  "author": "F2Ville",
+  "description": "Get the total price of Steam inventories, visible directly on the profile.",
+  "version": "1.0.0",
+  "disabled":true,
+  "config": {
+    "enableDevTools": true,
+    "init": "init.js",
+    "runtime": "runtime.js",
+    "stop": "stop.js"
+  },
+  "pages": [
+    {
+      "urlContains": "https://steamcommunity.com/id/"
+    }
+  ]
+}
