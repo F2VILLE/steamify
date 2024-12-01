@@ -177,3 +177,5 @@ dist
 
 
 config.json
+
+.vscode/
