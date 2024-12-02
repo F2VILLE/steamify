@@ -1,1 +1,3 @@
-console.log("Steam Inventory Price mod initialized");
+module.exports = (tab) => {
+  tab.sendAlert("Steam Inventory prices has been loaded!");
+};

@@ -21,6 +21,7 @@ class Tab extends EventEmitter {
       url,
       webSocketDebuggerUrl,
     } = tab;
+    // console.log("Tab", tab);
     this.id = id;
     this.url = url;
     this.title = title;
@@ -29,6 +30,78 @@ class Tab extends EventEmitter {
     this.devtoolsFrontendUrl = devtoolsFrontendUrl;
     this.ws = new WebSocket(webSocketDebuggerUrl);
     this.ws.onopen = () => {
+      if (!this.ws) {
+        return;
+      }
+
+      this.ws.onmessage = (data) => {
+        try {
+          const message = JSON.parse(data.data.toString());
+          if (message.method) {
+            console.log("Emitting", message.method);
+            this.emit(message.method, message);
+          }
+        } catch (error) {
+          console.log("Error parsing message", error);
+          // resolve("");
+        }
+      }
+
+      this.ws.send(
+        JSON.stringify({
+          id: Math.floor(Math.random() * 1000000),
+          method: "Runtime.enable",
+        })
+      );
+
+      // {"id":16,"method":"Log.enable","params":{}}
+      this.ws.send(
+        JSON.stringify({
+          id: Math.floor(Math.random() * 1000000),
+          method: "Log.enable",
+          params: {},
+        })
+      );
+
+      /*
+{"id":29,"method":"Page.getNavigationHistory","params":{}}
+{"id":8,"method":"Debugger.enable","params":{"maxScriptsCacheSize":10000000}}
+{"id":7,"method":"CSS.enable","params":{}}
+{"id":6,"method":"DOM.enable","params":{}}
+
+      */
+      this.ws.send(
+        JSON.stringify({
+          id: Math.floor(Math.random() * 1000000),
+          method: "Page.getNavigationHistory",
+          params: {},
+        })
+      );
+
+      this.ws.send(
+        JSON.stringify({
+          id: Math.floor(Math.random() * 1000000),
+          method: "Debugger.enable",
+          params: { maxScriptsCacheSize: 10000000 },
+        })
+      );
+
+      this.ws.send(
+        JSON.stringify({
+          id: Math.floor(Math.random() * 1000000),
+          method: "CSS.enable",
+          params: {},
+        })
+      );
+
+      this.ws.send(
+        JSON.stringify({
+          id: Math.floor(Math.random() * 1000000),
+          method: "DOM.enable",
+          params: {},
+        })
+      );
+
       this.emit("open");
     };
   }
@@ -53,7 +126,7 @@ class Tab extends EventEmitter {
 
       this.ws?.send(
         JSON.stringify({
-          id: 1,
+          id: Math.floor(Math.random() * 1000000),
           method: "Runtime.evaluate",
           params: {
             expression: script,
@@ -62,20 +135,28 @@ class Tab extends EventEmitter {
       );
 
       this.ws.onmessage = (data) => {
+        resolve("")
         try {
           const message = JSON.parse(data.data.toString());
-          if (message.id && message.id === 1) {
-            resolve(message.result?.value);
+          if (JSON.stringify(message).includes("steamcommunity")) {
+            // console.log("Message", message);
           }
-          else {
-            console.log("Unknown message", message);
+          if (message.id && message.id === 1) {
+            // resolve(message.result?.value);
+          } else {
+            // console.log("Unknown message", message);
           }
         } catch (error) {
           console.log("Error parsing message", error);
-          resolve("");
+          // resolve("");
         }
       };
+      
     });
+  }
+
+  async sendAlert(message: string) {
+    this.injectScript(`alert("${message}")`);
   }
 }
 

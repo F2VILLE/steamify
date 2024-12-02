@@ -51,19 +51,18 @@ class ModManager {
     );
 
     if (modConfig.config.init) {
-      mod.init = () => {
-        eval(
-          fs.readFileSync(path.join(modPath, modConfig.config.init), "utf-8")
-        );
-      };
+      mod.init = (await import(path.join(modPath, modConfig.config.init))).default;
+      console.log("Loaded init", mod.init);
+      if (typeof mod.init !== "function") {
+        throw new Error("Mod init must be a function");
+      }
     }
 
     if (modConfig.config.stop) {
-      mod.stop = () => {
-        eval(
-          fs.readFileSync(path.join(modPath, modConfig.config.stop), "utf-8")
-        );
-      };
+      mod.stop = (await import(path.join(modPath, modConfig.config.stop))).default;
+      if (typeof mod.stop !== "function") {
+        throw new Error("Mod stop must be a function");
+      }
     }
 
     // print a message "Loaded Mod" and pretty print the metadata

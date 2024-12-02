@@ -1,4 +1,5 @@
 import type { Filter } from "../types/Filter";
+import type Tab from "./Tab";
 
 class Mod {
   name: string = "";
@@ -26,7 +27,7 @@ class Mod {
     console.log(`[${this.name}]`, ...messages);
   }
 
-  init() {}
+  init(tab: Tab) {}
 
   stop() {}
 

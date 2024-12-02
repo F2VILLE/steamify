@@ -1,1 +1,3 @@
-console.log("Steam Inventory Price mod stopped");
+module.exports = (tab) => {
+    tab.sendAlert("Steam Inventory prices has been unloaded!");
+}

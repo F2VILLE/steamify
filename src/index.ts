@@ -6,14 +6,14 @@ import type { Filter } from "./core/types/Filter";
 const cef = new CEF();
 
 const renderVariables = {
-    steamID: "",
-    steamID64: "",
-    username: "",
-    avatar: "",
-    balance: "",
-    balanceFormatted: "",
-    balanceFormattedShort: "",
-}
+  steamID: "",
+  steamID64: "",
+  username: "",
+  avatar: "",
+  balance: "",
+  balanceFormatted: "",
+  balanceFormattedShort: "",
+};
 
 function checkFilter(filter: Filter, tab: Tab) {
   if (filter.url && filter.url !== tab.url) {
@@ -39,22 +39,69 @@ function checkFilter(filter: Filter, tab: Tab) {
   return true;
 }
 
+function checkFilterURL(filter: Filter, url: string) {
+  if (filter.url && filter.url !== url) {
+    return false;
+  }
+
+  if (filter.urlContains && !url.includes(filter.urlContains)) {
+    return false;
+  }
+
+  return true;
+}
+
 function renderScript(script: string) {
   script = script.replaceAll("{%{STEAM_API_KEY}%}", config.steamAPIKey);
   return script;
 }
 
-cef.fetchTabs().then((tabs) => {
+async function injectScript(tab: Tab, modManager: ModManager) {
+  for (const mod of modManager.mods) {
+    if (mod.config.pageFilters) {
+      for (const filter of mod.config.pageFilters) {
+        if (checkFilter(filter, tab) && !mod.config.disabled) {
+          mod.init(tab);
+          await tab.injectScript(renderScript(mod.runtime));
+          if (mod.config.enableDevTools) {
+            // tab.openDevTools();
+          }
+        }
+      }
+    }
+  }
+}
+
+cef.fetchTabs().then(async (tabs) => {
   const modManager = new ModManager();
   modManager.loadAllMods(config.modsPath);
 
   for (const tab of tabs) {
-    tab.on("open", () => {
+    tab.on("open", async () => {
+      injectScript(tab, modManager);
+    });
+
+    tab.on("Log.entryAdded", (data) => {
+      // console.log("Log.entryAdded", data.params);
+    })
+
+    tab.on("Runtime.consoleAPICalled", (data) => {
+      // console.log("Runtime.consoleAPICalled", data);
+    })
+
+    //Runtime.executionContextCreated
+    tab.on("Runtime.executionContextCreated", (data) => {
+      // console.log("Runtime.executionContextCreated", data.params);
+    });
+
+    tab.on("Debugger.scriptParsed", (data) => {
+      // if data.params.url is in filters, then inject script
+      // console.log("Debugger.scriptParsed", data.params);
       for (const mod of modManager.mods) {
         if (mod.config.pageFilters) {
           for (const filter of mod.config.pageFilters) {
-            if (checkFilter(filter, tab) && !mod.config.disabled) {
-              mod.init();
+            if (checkFilterURL(filter, data.params.url) && !mod.config.disabled) {
+              // mod.init(tab);
               tab.injectScript(renderScript(mod.runtime));
               if (mod.config.enableDevTools) {
                 // tab.openDevTools();

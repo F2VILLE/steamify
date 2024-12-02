@@ -1,1 +1,4 @@
-console.log("UserInfos mod initialized");
+
+module.exports = (tab) => {
+    tab.sendAlert("User Infos has been loaded!");
+}

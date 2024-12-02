@@ -1,1 +1,3 @@
-console.log("UserInfos Price mod stopped");
+module.exports = (tab) => {
+    tab.sendAlert("User Infos has been unloaded!");
+}
